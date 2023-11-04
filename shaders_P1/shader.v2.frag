@@ -5,8 +5,9 @@ out vec4 outColor;
 
 void main()
 {
-	if (mod (gl_PrimitiveID), 2) == 0)
+	if (mod (gl_PrimitiveID,2) == 0)
 		outColor = vec4(1);
 	else
 		outColor = vec4(0,0,1,1);
+
 }
