@@ -34,12 +34,12 @@ void mouseMotionFunc(int x, int y);
 int main(int argc, char** argv)
 {
 	std::locale::global(std::locale("spanish"));// acentos ;)
-	if (!IGlib::init("../shaders_P1/shader.v6.vert", "../shaders_P1/shader.v6.frag"))
+	if (!IGlib::init("../shaders_P1/shader.v7.vert", "../shaders_P1/shader.v7.frag"))
 		return -1;
 
 
-	glm::mat4 model = glm::mat4(1.);
-	glm::mat4 view = glm::mat4(1.);
+	glm::mat4 model = I;
+	glm::mat4 view = I;
 	view[3].z = -6.;
 
 	// Se inicia la matriz de proyeccion
@@ -67,10 +67,13 @@ int main(int argc, char** argv)
 	objId2 = IGlib::createObj(cubeNTriangleIndex, cubeNVertex, cubeTriangleIndex,
 		cubeVertexPos, cubeVertexColor, cubeVertexNormal, cubeVertexTexCoord, cubeVertexTangent);
 		
-	glm::mat4 modelMat = glm::mat4(1.0f);
+	glm::mat4 modelMat = I;
+
 	IGlib::setModelMat(objId, modelMat);
+	IGlib::setModelMat(objId2, modelMat);
 	//Incluir texturas aquí.
 	IGlib::addColorTex(objId, "../img/color.png");
+	IGlib::addColorTex(objId2, "../img/blanco-negro.png");
 
 
   //CBs
