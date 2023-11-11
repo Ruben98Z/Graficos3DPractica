@@ -13,15 +13,16 @@ int objId2 = -1;
 // Estado del botton izquierdo del raton
 bool leftPressed = false;
 // Angulo de desplazamiento camara
-float alphaX = 0;
 float alphaY = 0;
+// Posicion de la camara
+float posX = 1;
+float posZ = -6;
 //Matriz identidad
 glm::mat4 I = glm::mat4(1.0);
 // Matriz de proyección
 glm::mat4 proj = glm::mat4(0.);
-// Viewport
-float h = 500;
-float w = 500;
+// Matriz view
+glm::mat4 view = I;
 
 //Declaración de CB
 void resizeFunc(int width, int height);
@@ -39,8 +40,7 @@ int main(int argc, char** argv)
 
 
 	glm::mat4 model = I;
-	glm::mat4 view = I;
-	view[3].z = -6.;
+	view[3].z = posZ;
 
 	// Se inicia la matriz de proyeccion
 	// ( 1.73	0		0		0		)
@@ -102,11 +102,11 @@ void resizeFunc(int width, int height)
 	float near = 1.73;
 
 	proj[0].x = (2 * near) / (right - left); //Apertura horizontal	
- 
+
 	std::cout << "Reajuste de la matriz de proyeccion, aspect = " << aspect << std::endl << std::endl;
 
 	IGlib::setProjMat(proj);
-	
+
 }
 
 void idleFunc()
@@ -127,6 +127,34 @@ void idleFunc()
 void keyboardFunc(unsigned char key, int x, int y)
 {
 	std::cout << "Se ha pulsado la tecla " << key << std::endl << std::endl;
+
+	switch (key) {
+		case 'a':
+			posX = posX + 0.2;
+			break;
+		case 'w':
+			posZ = posZ + 0.2;
+			break;
+		case 's':
+			posZ = posZ - 0.2;
+			break;
+		case 'd':
+			posX = posX - 0.2;
+			break;
+		default:
+			break;
+	}
+
+	std::cout << "PosX " << posX << std::endl << std::endl;
+	std::cout << "PosZ " << posZ << std::endl << std::endl;
+
+	// Matriz view
+	glm::vec3 pos(posX, 0, posZ);
+	glm::vec3 lookat(0, 0, -1);
+	glm::vec3 up(0.0, 1.0, 0.0);
+	view = glm::lookAt(pos, lookat, up);
+
+	IGlib::setViewMat(view);
 }
 
 void mouseFunc(int button, int state, int x, int y)
