@@ -149,10 +149,8 @@ void keyboardFunc(unsigned char key, int x, int y)
 	std::cout << "PosZ " << posZ << std::endl << std::endl;
 
 	// Matriz view
-	glm::vec3 pos(posX, 0, posZ);
-	glm::vec3 lookat(0, 0, -1);
-	glm::vec3 up(0.0, 1.0, 0.0);
-	view = glm::lookAt(pos, lookat, up);
+	view[3].z = posZ;
+	view[3].x = posX;
 
 	IGlib::setViewMat(view);
 }
