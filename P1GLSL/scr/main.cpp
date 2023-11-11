@@ -16,6 +16,10 @@ bool leftPressed = false;
 // Angulo de desplazamiento camara
 float alphaX = 0;
 float alphaY = 0;
+
+float aX = 0.0;
+float aY = 0.0;
+
 // Posicion de la camara
 float posX = 1;
 float posZ = -6;
@@ -62,6 +66,8 @@ int main(int argc, char** argv)
 	proj[2].z = -1.2;
 	proj[2].w = -1.0;
 	proj[3].z = -2.2;
+
+	// -1.2 * (f-n) = -f-n // -1.2f + 1.2n = -f - n // - 0.2f = -2.2n // -0.2f = -3.806
    
 	//Se ajusta la cámara
 	// Matriz de Proyección P (Perspectiva)
@@ -105,18 +111,15 @@ void resizeFunc(int width, int height)
 	w = width;
 	h = height;
 
-	//Ajusta el aspect ratio al tamaño de la ventana
-
-	float aspect = (float)width / (float)height;
-	float right = aspect;
-	float left = -aspect;
-	float top = 1.0;
-	float bottom = -1.0;
-	float near = 1.73;
-
-	proj[0].x = (2 * near) / (right - left); //Apertura horizontal	
+	// Matriz de Proyección P (Perspectiva)
+	float nplane = 1.73;
+	float fplane = 19.03;
+	float aspect = (float)w / (float)h; //Ajusta el aspect ratio al tamaño de la ventana
+	glm::mat4 P = glm::perspective(glm::radians(60.f), aspect, nplane, fplane);
 
 	std::cout << "Reajuste de la matriz de proyeccion, aspect = " << aspect << std::endl << std::endl;
+
+	proj = P;
 
 	IGlib::setProjMat(proj);
 
@@ -154,15 +157,31 @@ void keyboardFunc(unsigned char key, int x, int y)
 		case 'd':
 			posX = posX - 0.2;
 			break;
+		case 'y':
+			aX = aX + 10;
+			break;
+		case 'Y':
+			aX = aX - 10;
+			break;
 		default:
 			break;
 	}
 
 	std::cout << "PosX " << posX << std::endl << std::endl;
 	std::cout << "PosZ " << posZ << std::endl << std::endl;
+	std::cout << "aX " << aX << std::endl << std::endl;
+	std::cout << "aY " << aY << std::endl << std::endl;
+
+	// Ángulo de desplazamiento de la camara
+	alphaX = glm::radians(aX);
+
+	float x_lookAt = glm::cos(alphaY) * glm::sin(alphaX);
+	float y_lookAt = glm::sin(alphaY);
+	float z_lookAt = glm::cos(alphaY) * glm::cos(alphaX);
 
 	// Matriz view
 	glm::vec3 pos(posX, 0, posZ);
+	lookat = glm::vec3(x_lookAt, y_lookAt, z_lookAt);
 	glm::vec3 up(0.0, 1.0, 0.0);
 	view = glm::lookAt(pos, lookat, up);
 
@@ -195,14 +214,14 @@ void mouseMotionFunc(int x, int y)
 	int posXMouse = (w / 2) - x;
 
 	// Ángulo de desplazamiento de la camara
-	float aY = posYMouse * 0.3;
-	float aX = posXMouse * 0.3;
+	aY = posYMouse * 0.3;
+	aX = posXMouse * 0.3;
 
 
-	if (aY > -89 && aY < 89)
+	if (aY > -119 && aY < 119)
 		alphaY = glm::radians(aY);
 
-	if (aX > -89 && aX < 89)
+	if (aX > -119 && aX < 119)
 		alphaX = glm::radians(aX);
 
 	float x_lookAt = glm::cos(alphaY) * glm::sin(alphaX);
