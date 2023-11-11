@@ -12,17 +12,27 @@ int objId =-1;
 int objId2 = -1;
 // Estado del botton izquierdo del raton
 bool leftPressed = false;
+
 // Angulo de desplazamiento camara
+float alphaX = 0;
 float alphaY = 0;
 // Posicion de la camara
 float posX = 1;
 float posZ = -6;
+// Vector look at de la camara
+glm::vec3 lookat(0, 0, -1);
+
 //Matriz identidad
 glm::mat4 I = glm::mat4(1.0);
 // Matriz de proyección
 glm::mat4 proj = glm::mat4(0.);
 // Matriz view
 glm::mat4 view = I;
+
+
+// Viewport
+int w = 500;
+int h = 500;
 
 //Declaración de CB
 void resizeFunc(int width, int height);
@@ -92,6 +102,9 @@ int main(int argc, char** argv)
 
 void resizeFunc(int width, int height)
 {
+	w = width;
+	h = height;
+
 	//Ajusta el aspect ratio al tamaño de la ventana
 
 	float aspect = (float)width / (float)height;
@@ -149,8 +162,9 @@ void keyboardFunc(unsigned char key, int x, int y)
 	std::cout << "PosZ " << posZ << std::endl << std::endl;
 
 	// Matriz view
-	view[3].z = posZ;
-	view[3].x = posX;
+	glm::vec3 pos(posX, 0, posZ);
+	glm::vec3 up(0.0, 1.0, 0.0);
+	view = glm::lookAt(pos, lookat, up);
 
 	IGlib::setViewMat(view);
 }
@@ -176,5 +190,34 @@ void mouseFunc(int button, int state, int x, int y)
 
 void mouseMotionFunc(int x, int y)
 {
-	
+	// Posición del raton con respecto el viewport
+	int posYMouse = (h / 2) - y;
+	int posXMouse = (w / 2) - x;
+
+	// Ángulo de desplazamiento de la camara
+	float aY = posYMouse * 0.3;
+	float aX = posXMouse * 0.3;
+
+
+	if (aY > -89 && aY < 89)
+		alphaY = glm::radians(aY);
+
+	if (aX > -89 && aX < 89)
+		alphaX = glm::radians(aX);
+
+	float x_lookAt = glm::cos(alphaY) * glm::sin(alphaX);
+	float y_lookAt = glm::sin(alphaY);
+	float z_lookAt = glm::cos(alphaY) * glm::cos(alphaX);
+
+	// Actualiza la posición y la orientación de la cámara
+	glm::vec3 pos = glm::vec3(posX, 0, posZ);
+	lookat = glm::vec3(x_lookAt, y_lookAt, z_lookAt);
+	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	// Actualiza la matriz de vista (view)
+	view = glm::lookAt(pos, lookat, up);
+
+	// Actualiza la matriz de vista en IGlib (o donde sea necesario)
+	IGlib::setViewMat(view);
 }
+
