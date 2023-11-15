@@ -183,7 +183,7 @@ void keyboardFunc(unsigned char key, int x, int y)
 	glm::vec3 pos(posX, 0, posZ);
 	lookat = glm::vec3(x_lookAt, y_lookAt, z_lookAt);
 	glm::vec3 up(0.0, 1.0, 0.0);
-	view = glm::lookAt(pos, lookat, up);
+	view = glm::lookAt(pos, pos + lookat, up);
 
 	IGlib::setViewMat(view);
 }
@@ -213,7 +213,7 @@ void mouseMotionFunc(int x, int y)
 	int posYMouse = (h / 2) - y;
 	int posXMouse = (w / 2) - x;
 
-	// Ángulo de desplazamiento de la camara
+	// Ángulo de desplazamiento de la camara aplicando una sensibilidad
 	aY = posYMouse * 0.3;
 	aX = posXMouse * 0.3;
 
