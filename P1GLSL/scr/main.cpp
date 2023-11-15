@@ -218,12 +218,14 @@ void mouseMotionFunc(int x, int y)
 	aX = posXMouse * 0.3;
 
 
+	// Limitar los ángulos para evitar giros bruscos
 	if (aY > -119 && aY < 119)
 		alphaY = glm::radians(aY);
 
 	if (aX > -119 && aX < 119)
 		alphaX = glm::radians(aX);
 
+	// Calcular la dirección de la mirada (lookAt)
 	float x_lookAt = glm::cos(alphaY) * glm::sin(alphaX);
 	float y_lookAt = glm::sin(alphaY);
 	float z_lookAt = glm::cos(alphaY) * glm::cos(alphaX);
@@ -234,7 +236,7 @@ void mouseMotionFunc(int x, int y)
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	// Actualiza la matriz de vista (view)
-	view = glm::lookAt(pos, lookat, up);
+	view = glm::lookAt(pos, pos + lookat, up);
 
 	// Actualiza la matriz de vista en IGlib (o donde sea necesario)
 	IGlib::setViewMat(view);
