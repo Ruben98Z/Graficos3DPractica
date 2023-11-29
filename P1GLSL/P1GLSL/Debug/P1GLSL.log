@@ -1,0 +1,31 @@
+﻿cl : línea de comandos warning D9035: La opción 'Gm' está desusada y se quitará en próximas versiones
+  main.cpp
+C:\Users\ruben\Desktop\Universidad\Master\Graficos3D\Graficos3DPractica\P1GLSL\scr\main.cpp(64,24): warning C4305: '=': truncamiento de 'double' a 'T'
+          with
+          [
+              T=float
+          ]
+C:\Users\ruben\Desktop\Universidad\Master\Graficos3D\Graficos3DPractica\P1GLSL\scr\main.cpp(65,24): warning C4305: '=': truncamiento de 'double' a 'T'
+          with
+          [
+              T=float
+          ]
+C:\Users\ruben\Desktop\Universidad\Master\Graficos3D\Graficos3DPractica\P1GLSL\scr\main.cpp(66,18): warning C4305: '=': truncamiento de 'double' a 'T'
+          with
+          [
+              T=float
+          ]
+C:\Users\ruben\Desktop\Universidad\Master\Graficos3D\Graficos3DPractica\P1GLSL\scr\main.cpp(68,18): warning C4305: '=': truncamiento de 'double' a 'T'
+          with
+          [
+              T=float
+          ]
+C:\Users\ruben\Desktop\Universidad\Master\Graficos3D\Graficos3DPractica\P1GLSL\scr\main.cpp(120,19): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\ruben\Desktop\Universidad\Master\Graficos3D\Graficos3DPractica\P1GLSL\scr\main.cpp(134,52): warning C4244: '+=': conversión de 'double' a 'float'; posible pérdida de datos
+C:\Users\ruben\Desktop\Universidad\Master\Graficos3D\Graficos3DPractica\P1GLSL\scr\main.cpp(151,16): warning C4244: '=': conversión de 'double' a 'float'; posible pérdida de datos
+C:\Users\ruben\Desktop\Universidad\Master\Graficos3D\Graficos3DPractica\P1GLSL\scr\main.cpp(154,16): warning C4244: '=': conversión de 'double' a 'float'; posible pérdida de datos
+C:\Users\ruben\Desktop\Universidad\Master\Graficos3D\Graficos3DPractica\P1GLSL\scr\main.cpp(157,16): warning C4244: '=': conversión de 'double' a 'float'; posible pérdida de datos
+C:\Users\ruben\Desktop\Universidad\Master\Graficos3D\Graficos3DPractica\P1GLSL\scr\main.cpp(160,16): warning C4244: '=': conversión de 'double' a 'float'; posible pérdida de datos
+C:\Users\ruben\Desktop\Universidad\Master\Graficos3D\Graficos3DPractica\P1GLSL\scr\main.cpp(219,17): warning C4244: '=': conversión de 'double' a 'float'; posible pérdida de datos
+C:\Users\ruben\Desktop\Universidad\Master\Graficos3D\Graficos3DPractica\P1GLSL\scr\main.cpp(220,17): warning C4244: '=': conversión de 'double' a 'float'; posible pérdida de datos
+  P1GLSL.vcxproj -> C:\Users\ruben\Desktop\Universidad\Master\Graficos3D\Graficos3DPractica\P1GLSL\Debug\P1GLSL.exe
