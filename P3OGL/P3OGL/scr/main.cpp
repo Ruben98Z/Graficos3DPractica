@@ -56,7 +56,14 @@ unsigned int triangleIndexVBO;
 
 
 
+//Texturas
+unsigned int colorTexId;
+unsigned int emiTexId;
 
+
+//Texturas Uniform
+int uColorTex;
+int uEmiTex;
 
 
 // Viewport
@@ -102,7 +109,7 @@ int main(int argc, char** argv)
 
 	initContext(argc, argv);
 	initOGL();
-	initShader("../shaders_P3/shader.v0.vert", "../shaders_P3/shader.v0.frag");
+	initShader("../shaders_P3/shader.v1.vert", "../shaders_P3/shader.v1.frag");
 	initObj2();
 
 	glutMainLoop();
@@ -179,6 +186,10 @@ void destroy()
 	//glDeleteBuffers(1, &texCoordVBO);
 	//glDeleteBuffers(1, &triangleIndexVBO);
 	glDeleteVertexArrays(1, &vao);
+
+	glDeleteTextures(1, &colorTexId);
+	glDeleteTextures(1, &emiTexId);
+
 }
 void initShader(const char *vname, const char *fname)
 {
@@ -212,6 +223,10 @@ void initShader(const char *vname, const char *fname)
 	inColor = glGetAttribLocation(program, "inColor");
 	inNormal = glGetAttribLocation(program, "inNormal");
 	inTexCoord = glGetAttribLocation(program, "inTexCoord");
+
+	uColorTex = glGetUniformLocation(program, "colorTex");
+	uEmiTex = glGetUniformLocation(program, "emiTex");
+
 
 }
 void initObj1()
@@ -293,6 +308,7 @@ void initObj2()
 	unsigned int buff;
 	glGenBuffers(1, &buff);
 
+
 	unsigned int sizeOfIndex = cubeNTriangleIndex * sizeof(unsigned int) * 3;
 	glBindBuffer(GL_ARRAY_BUFFER, buff);
 	//Reserva de memoria grafica
@@ -332,7 +348,11 @@ void initObj2()
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buff);
 
+
 	model = glm::mat4(1.0f);
+
+	colorTexId = loadTex("../img/color2.png");
+	emiTexId = loadTex("../img/emissive.png");
 }
 
 //
@@ -377,7 +397,42 @@ GLuint loadShader(const char *fileName, GLenum type)
 
 	return shader; 
 }
-unsigned int loadTex(const char *fileName){ return 0; }
+unsigned int loadTex(const char *fileName){
+
+	//Carga la textura almacenada en el fichero indicado
+	unsigned char* map;
+	unsigned int w, h;
+	map = loadTexture(fileName, w, h);
+	if (!map)
+	{
+		std::cout << "Error cargando el fichero: "
+			<< fileName << std::endl;
+		exit(-1);
+	}
+
+	//Crea una textura, actívala y súbela a la tarjeta gráfica
+	unsigned int texId;
+	glGenTextures(1, &texId);
+	glBindTexture(GL_TEXTURE_2D, texId);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA,
+		GL_UNSIGNED_BYTE, (GLvoid*)map);
+
+	//Libera la memoria de la CPU
+	delete[] map;
+
+	//Crea los mipmaps asociados a la textura
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	//Configura el modo de acceso
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+		GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+
+
+	return texId;
+}
 
 void renderFunc(){
 
@@ -405,6 +460,20 @@ void renderFunc(){
 		GL_UNSIGNED_INT, (void*)0);
 
 
+
+	//Texturas
+	if (uColorTex != -1)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, colorTexId);
+		glUniform1i(uColorTex, 0);
+	}
+	if (uEmiTex != -1)
+	{
+		glActiveTexture(GL_TEXTURE0 + 1);
+		glBindTexture(GL_TEXTURE_2D, emiTexId);
+		glUniform1i(uEmiTex, 1);
+	}
 
 	//Cuando termine la renderización hay que cambiar el buffer front por back
 	//Llamada sincrona
