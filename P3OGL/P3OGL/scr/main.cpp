@@ -70,6 +70,19 @@ int uEmiTex;
 int w = 500;
 int h = 500;
 
+// Angulo de desplazamiento camara
+float alphaX = 0;
+float alphaY = 0;
+
+float aX = 0.0;
+float aY = 0.0;
+
+// Posicion de la camara
+float posX = 1;
+float posZ = -6;
+// Vector look at de la camara
+glm::vec3 lookat(0, 0, -1);
+
 
 
 //////////////////////////////////////////////////////////////
@@ -503,8 +516,90 @@ void idleFunc()
 	glutPostRedisplay();
 
 }
-void keyboardFunc(unsigned char key, int x, int y){}
-void mouseFunc(int button, int state, int x, int y){}
+void keyboardFunc(unsigned char key, int x, int y)
+{
+	std::cout << "Se ha pulsado la tecla " << key << std::endl << std::endl;
+
+	switch (key) {
+	case 'a':
+		posX = posX + 0.2;
+		break;
+	case 'w':
+		posZ = posZ + 0.2;
+		break;
+	case 's':
+		posZ = posZ - 0.2;
+		break;
+	case 'd':
+		posX = posX - 0.2;
+		break;
+	case 'y':
+		aX = aX + 10;
+		break;
+	case 'Y':
+		aX = aX - 10;
+		break;
+	default:
+		break;
+	}
+
+	std::cout << "PosX " << posX << std::endl << std::endl;
+	std::cout << "PosZ " << posZ << std::endl << std::endl;
+	std::cout << "aX " << aX << std::endl << std::endl;
+	std::cout << "aY " << aY << std::endl << std::endl;
+
+	// Ángulo de desplazamiento de la camara
+	alphaX = glm::radians(aX);
+
+	float x_lookAt = glm::cos(alphaY) * glm::sin(alphaX);
+	float y_lookAt = glm::sin(alphaY);
+	float z_lookAt = glm::cos(alphaY) * glm::cos(alphaX);
+
+	// Distancia de la camara al objeto
+	float dist = distance(glm::vec3(posX, 0, posZ), glm::vec3(0));
+	std::cout << "Distancia de la camara al objeto " << dist << std::endl << std::endl;
+
+	// Matriz view
+	glm::vec3 pos(posX, 0, posZ);
+	lookat = glm::vec3(x_lookAt, y_lookAt, z_lookAt);
+	glm::vec3 up(0.0, 1.0, 0.0);
+	view = glm::lookAt(pos, pos + lookat, up);
+
+	glutPostRedisplay();
+}
+
+void mouseFunc(int button, int state, int x, int y)
+{
+	// Posición del raton con respecto el viewport
+	int posYMouse = (h / 2) - y;
+	int posXMouse = (w / 2) - x;
+
+	// Ángulo de desplazamiento de la camara aplicando una sensibilidad
+	aY = posYMouse * 0.3;
+	aX = posXMouse * 0.3;
+
+
+	// Limitar los ángulos para evitar giros bruscos
+	alphaY = glm::radians(aY);
+	alphaX = glm::radians(aX);
+
+	// Calcular la dirección de la mirada (lookAt)
+	float x_lookAt = glm::cos(alphaY) * glm::sin(alphaX);
+	float y_lookAt = glm::sin(alphaY);
+	float z_lookAt = glm::cos(alphaY) * glm::cos(alphaX);
+
+	// Actualiza la posición y la orientación de la cámara
+	glm::vec3 pos = glm::vec3(posX, 0, posZ);
+	lookat = glm::vec3(x_lookAt, y_lookAt, z_lookAt);
+	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	// Actualiza la matriz de vista (view)
+	view = glm::lookAt(pos, pos + lookat, up);
+
+	// Actualiza la matriz de vista en IGlib (o donde sea necesario)
+	glutPostRedisplay();
+}
+
 
 
 
