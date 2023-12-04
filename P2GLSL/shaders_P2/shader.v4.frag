@@ -17,11 +17,11 @@ vec3 offset = vec3(6.0, 0.0, 6.0);
 //Fuente de luz 1
 //Variables uniformes de la fuente de luz
 vec3 Il = vec3(0, 0, 0.7);  
-vec3 pl = (view * vec4(offset, 1)).xyz;
+vec3 pl = (view * vec4(offset, 0)).xyz;
 
 // Fuente de luz 2
 vec3 Il2 = vec3(0.7, 0, 0); 
-vec3 pl2 = (view * vec4(-offset, 1)).xyz; 
+vec3 pl2 = (view * vec4(-offset, 0)).xyz; 
 
 
 vec3 Ia = vec3(0.5); // Intensidad Ambiental
