@@ -17,7 +17,7 @@ vec3 Ia = vec3(0.1);
 vec3 Il = vec3(1);
 
 // Dirección de la luz
-vec3 lightDirection = (view * vec4(vec3(-1, 0, 0), 1)).xyz; 
+vec3 lightDirection = (view * vec4(vec3(-1, 0, 0), 0)).xyz; 
 
 vec3 L;
 
