@@ -22,6 +22,8 @@ glm::mat4	proj = glm::mat4(1.0f);
 glm::mat4	view = glm::mat4(1.0f);
 glm::mat4	model = glm::mat4(1.0f);
 
+glm::mat4	model2 = glm::mat4(1.0f);
+
 
 //////////////////////////////////////////////////////////////
 // Variables que nos dan acceso a Objetos OpenGL
@@ -239,6 +241,8 @@ void initShader(const char *vname, const char *fname)
 
 	uColorTex = glGetUniformLocation(program, "colorTex");
 	uEmiTex = glGetUniformLocation(program, "emiTex");
+	
+	
 
 
 }
@@ -314,6 +318,7 @@ void initObj1()
 
 	model = glm::mat4(1.0f);
 
+
 }
 
 void initObj2()
@@ -366,6 +371,9 @@ void initObj2()
 
 	colorTexId = loadTex("../img/color2.png");
 	emiTexId = loadTex("../img/emissive.png");
+
+	model2 = glm::mat4(1.0f);
+
 }
 
 //
@@ -454,6 +462,7 @@ void renderFunc(){
 
 	glUseProgram(program);
 
+	//Primer cubo
 	glm::mat4 modelView = view * model;
 	glm::mat4 modelViewProj = proj * view * model;
 	glm::mat4 normal = glm::transpose(glm::inverse(modelView));
@@ -469,6 +478,23 @@ void renderFunc(){
 
 	//Activo la geometria que voy a pintar
 	glBindVertexArray(vao);
+	glDrawElements(GL_TRIANGLES, cubeNTriangleIndex * 3,
+		GL_UNSIGNED_INT, (void*)0);
+
+	// Segundo cubo
+	modelView = view * model2;
+	modelViewProj = proj * view * model2;
+	normal = glm::transpose(glm::inverse(modelView));
+	if (uModelViewMat != -1)
+		glUniformMatrix4fv(uModelViewMat, 1, GL_FALSE,
+			&(modelView[0][0]));
+	if (uModelViewProjMat != -1)
+		glUniformMatrix4fv(uModelViewProjMat, 1, GL_FALSE,
+			&(modelViewProj[0][0]));
+	if (uNormalMat != -1)
+		glUniformMatrix4fv(uNormalMat, 1, GL_FALSE,
+			&(normal[0][0]));
+
 	glDrawElements(GL_TRIANGLES, cubeNTriangleIndex * 3,
 		GL_UNSIGNED_INT, (void*)0);
 
@@ -493,6 +519,7 @@ void renderFunc(){
 	glutSwapBuffers();
 
 }
+
 void resizeFunc(int width, int height)
 {
 	glViewport(0, 0, width, height);
@@ -512,6 +539,11 @@ void idleFunc()
 	static float angle = 0.0f;
 	angle = (angle > 3.141592f * 2.0f) ? 0 : angle + 0.01f;
 	model = glm::rotate(model, angle, glm::vec3(1.0f, 1.0f, 0.0f));
+
+	// Segundo cubo 
+	glm::mat4 rotate90y = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.f, 1.f, 0.f));
+	glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(-3.0, 0.0, 0.0));
+	model2 = rotate90y * translate * rotate90y;
 
 	glutPostRedisplay();
 
