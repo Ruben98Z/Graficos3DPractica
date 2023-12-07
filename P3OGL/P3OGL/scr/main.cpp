@@ -35,15 +35,31 @@ unsigned int vshader;
 unsigned int fshader;
 unsigned int program;
 
+unsigned int vshader2;
+unsigned int fshader2;
+unsigned int program2;
+
 //Variables Uniform
 int uModelViewMat;
 int uModelViewProjMat;
 int uNormalMat;
+int uView;
+
+int uModelViewMat2;
+int uModelViewProjMat2;
+int uNormalMat2;
+int uView2;
+
 //Atributos
 int inPos;
 int inColor;
 int inNormal;
 int inTexCoord;
+
+int inPos2;
+int inColor2;
+int inNormal2;
+int inTexCoord2;
 
 
 
@@ -62,11 +78,21 @@ unsigned int triangleIndexVBO;
 unsigned int colorTexId;
 unsigned int emiTexId;
 
+unsigned int colorTexId2;
+unsigned int emiTexId2;
+unsigned int specTexId;
+unsigned int normalTexId;
+
+
 
 //Texturas Uniform
 int uColorTex;
 int uEmiTex;
 
+int uColorTex2;
+int uEmiTex2;
+int uSpecTex;
+int uNormalTex;
 
 // Viewport
 int w = 500;
@@ -84,6 +110,17 @@ float posX = 1;
 float posZ = -6;
 // Vector look at de la camara
 glm::vec3 lookat(0, 0, -1);
+
+//Propiedades de la luz
+glm::vec3	lightIntensity = glm::vec3(1.0f);
+glm::vec3	lightPos = glm::vec3(0.0, 0.0, 0.0);
+
+int uLightIntensity;
+int uLightPos;
+
+int uLightIntensity2;
+int uLightPos2;
+
 
 
 
@@ -103,6 +140,7 @@ void mouseFunc(int button, int state, int x, int y);
 void initContext(int argc, char** argv);
 void initOGL();
 void initShader(const char *vname, const char *fname);
+void initShader2(const char* vname, const char* fname);
 void initObj1();
 void initObj2();
 void destroy();
@@ -125,6 +163,7 @@ int main(int argc, char** argv)
 	initContext(argc, argv);
 	initOGL();
 	initShader("../shaders_P3/shader.v1.vert", "../shaders_P3/shader.v1.frag");
+	initShader2("../shaders_P3/shader.v2.vert", "../shaders_P3/shader.v2.frag");
 	initObj2();
 
 	glutMainLoop();
@@ -188,11 +227,20 @@ void initOGL(){
 }
 void destroy()
 {
+	//Primera pareja de shaders
 	glDetachShader(program, vshader);
 	glDetachShader(program, fshader);
 	glDeleteShader(vshader);
 	glDeleteShader(fshader);
 	glDeleteProgram(program);
+
+
+	//Segunda pareja de shaders
+	glDetachShader(program2, vshader2);
+	glDetachShader(program2, fshader2);
+	glDeleteShader(vshader2);
+	glDeleteShader(fshader2);
+	glDeleteProgram(program2);
 
 	
 	//glDeleteBuffers(1, &posVBO);
@@ -204,6 +252,11 @@ void destroy()
 
 	glDeleteTextures(1, &colorTexId);
 	glDeleteTextures(1, &emiTexId);
+
+	glDeleteTextures(1, &colorTexId2);
+	glDeleteTextures(1, &emiTexId2);
+	glDeleteTextures(1, &specTexId);
+	glDeleteTextures(1, &normalTexId);
 
 }
 void initShader(const char *vname, const char *fname)
@@ -241,8 +294,65 @@ void initShader(const char *vname, const char *fname)
 
 	uColorTex = glGetUniformLocation(program, "colorTex");
 	uEmiTex = glGetUniformLocation(program, "emiTex");
+
+	uLightIntensity = glGetUniformLocation(program, "lightIntensity");
+	uLightPos = glGetUniformLocation(program, "lightPos");
+	uView = glGetUniformLocation(program, "view");
 	
-	
+
+}
+
+void initShader2(const char* vname, const char* fname) {
+
+	vshader2 = loadShader(vname, GL_VERTEX_SHADER);
+	fshader2 = loadShader(fname, GL_FRAGMENT_SHADER);
+
+	program2 = glCreateProgram();
+	glAttachShader(program2, vshader2);
+	glAttachShader(program2, fshader2);
+
+	glBindAttribLocation(program2, 0, "inPos");
+	glBindAttribLocation(program2, 1, "inColor");
+	glBindAttribLocation(program2, 2, "inNormal");
+	glBindAttribLocation(program2, 3, "inTexCoord");
+
+	glLinkProgram(program2);
+
+
+	GLint linked;
+	glGetProgramiv(program2, GL_LINK_STATUS, &linked);
+	if (!linked)
+	{
+		//Calculamos una cadena de error
+		GLint logLen;
+		glGetProgramiv(program2, GL_INFO_LOG_LENGTH, &logLen);
+		char* logString = new char[logLen];
+		glGetProgramInfoLog(program2, logLen, NULL, logString);
+		std::cout << "Error: " << logString << std::endl;
+		delete[] logString;
+		glDeleteProgram(program2);
+		program2 = 0;
+		exit(-1);
+	}
+
+	uNormalMat2 = glGetUniformLocation(program2, "normal");
+	uModelViewMat2 = glGetUniformLocation(program2, "modelView");
+	uModelViewProjMat2 = glGetUniformLocation(program2, "modelViewProj");
+
+	uColorTex2 = glGetUniformLocation(program2, "colorTex");
+	uEmiTex2 = glGetUniformLocation(program2, "emiTex");
+	uSpecTex = glGetUniformLocation(program2, "specTex");
+	uNormalTex = glGetUniformLocation(program2, "normalTex");
+
+
+	inPos2 = glGetAttribLocation(program2, "inPos");
+	inColor2 = glGetAttribLocation(program2, "inColor");
+	inNormal2 = glGetAttribLocation(program2, "inNormal");
+	inTexCoord2 = glGetAttribLocation(program2, "inTexCoord");
+
+	uLightIntensity2 = glGetUniformLocation(program2, "lightIntensity");
+	uLightPos2 = glGetUniformLocation(program2, "lightPos");
+	uView2 = glGetUniformLocation(program2, "view");
 
 
 }
@@ -374,6 +484,11 @@ void initObj2()
 
 	model2 = glm::mat4(1.0f);
 
+	colorTexId2 = loadTex("../img/color2.png");
+	emiTexId2 = loadTex("../img/emissive.png");
+	specTexId = loadTex("../img/specMap.png");
+	normalTexId = loadTex("../img/normal.png");
+
 }
 
 //
@@ -466,6 +581,9 @@ void renderFunc(){
 	glm::mat4 modelView = view * model;
 	glm::mat4 modelViewProj = proj * view * model;
 	glm::mat4 normal = glm::transpose(glm::inverse(modelView));
+	if (uView != -1)
+		glUniformMatrix4fv(uView, 1, GL_FALSE,
+			&(view[0][0]));
 	if (uModelViewMat != -1)
 		glUniformMatrix4fv(uModelViewMat, 1, GL_FALSE,
 			&(modelView[0][0]));
@@ -476,30 +594,46 @@ void renderFunc(){
 		glUniformMatrix4fv(uNormalMat, 1, GL_FALSE,
 			&(normal[0][0]));
 
+	if (uLightIntensity != -1) 
+		glUniform3fv(uLightIntensity, 1, &(lightIntensity.x));
+	if (uLightPos != -1) 
+		glUniform3fv(uLightPos, 1, &(lightPos.x));
+
+
 	//Activo la geometria que voy a pintar
 	glBindVertexArray(vao);
+
 	glDrawElements(GL_TRIANGLES, cubeNTriangleIndex * 3,
 		GL_UNSIGNED_INT, (void*)0);
+
+
 
 	// Segundo cubo
 	modelView = view * model2;
 	modelViewProj = proj * view * model2;
 	normal = glm::transpose(glm::inverse(modelView));
-	if (uModelViewMat != -1)
-		glUniformMatrix4fv(uModelViewMat, 1, GL_FALSE,
+	if(uView2 != -1)
+		glUniformMatrix4fv(uView2, 1, GL_FALSE,
+			&(view[0][0]));
+	if (uModelViewMat2 != -1)
+		glUniformMatrix4fv(uModelViewMat2, 1, GL_FALSE,
 			&(modelView[0][0]));
-	if (uModelViewProjMat != -1)
-		glUniformMatrix4fv(uModelViewProjMat, 1, GL_FALSE,
+	if (uModelViewProjMat2 != -1)
+		glUniformMatrix4fv(uModelViewProjMat2, 1, GL_FALSE,
 			&(modelViewProj[0][0]));
-	if (uNormalMat != -1)
-		glUniformMatrix4fv(uNormalMat, 1, GL_FALSE,
+	if (uNormalMat2 != -1)
+		glUniformMatrix4fv(uNormalMat2, 1, GL_FALSE,
 			&(normal[0][0]));
+
+	if (uLightIntensity2 != -1)
+		glUniform3fv(uLightIntensity2, 1, &(lightIntensity.x));
+	if (uLightPos2 != -1)
+		glUniform3fv(uLightPos2, 1, &(lightPos.x));
 
 	glDrawElements(GL_TRIANGLES, cubeNTriangleIndex * 3,
 		GL_UNSIGNED_INT, (void*)0);
 
-
-
+	
 	//Texturas
 	if (uColorTex != -1)
 	{
@@ -513,6 +647,36 @@ void renderFunc(){
 		glBindTexture(GL_TEXTURE_2D, emiTexId);
 		glUniform1i(uEmiTex, 1);
 	}
+
+	//Texturas
+
+	if (uColorTex2 != -1)
+	{
+		glActiveTexture(GL_TEXTURE0 + 2);
+		glBindTexture(GL_TEXTURE_2D, colorTexId2);
+		glUniform1i(uColorTex2, 2);
+	}
+	if (uEmiTex2 != -1)
+	{
+		glActiveTexture(GL_TEXTURE0 + 3);
+		glBindTexture(GL_TEXTURE_2D, emiTexId2);
+		glUniform1i(uEmiTex2, 3);
+	}
+
+	if (uSpecTex != -1)
+	{
+		glActiveTexture(GL_TEXTURE0 + 4);
+		glBindTexture(GL_TEXTURE_2D, specTexId);
+		glUniform1i(uSpecTex, 4);
+	}
+	if (uNormalTex != -1)
+	{
+		glActiveTexture(GL_TEXTURE0 + 5);
+		glBindTexture(GL_TEXTURE_2D, normalTexId);
+		glUniform1i(uNormalTex, 5);
+	}
+
+	
 
 	//Cuando termine la renderización hay que cambiar el buffer front por back
 	//Llamada sincrona
@@ -571,14 +735,38 @@ void keyboardFunc(unsigned char key, int x, int y)
 	case 'Y':
 		aX = aX - 10;
 		break;
+	case 'x':
+		lightPos = lightPos + glm::vec3(-1.0, 0, 0);
+		break;
+	case 'X':
+		lightPos = lightPos + glm::vec3(1.0, 0, 0);
+		break;
+	case 'z':
+		lightPos = lightPos + glm::vec3(0, 0, -1.0);
+		break;
+	case 'Z':
+		lightPos = lightPos + glm::vec3(0, 0, 1.0);
+		break;
+	case 'i':
+		if(lightIntensity.x > 0)
+			lightIntensity = lightIntensity - glm::vec3(0.1, 0.1, 0.1);
+		break;
+	case 'I':
+		if (lightIntensity.x < 1)
+			lightIntensity = lightIntensity + glm::vec3(0.1, 0.1, 0.1);
+		break;
 	default:
 		break;
 	}
+
 
 	std::cout << "PosX " << posX << std::endl << std::endl;
 	std::cout << "PosZ " << posZ << std::endl << std::endl;
 	std::cout << "aX " << aX << std::endl << std::endl;
 	std::cout << "aY " << aY << std::endl << std::endl;
+	std::cout << "PosX luz " << lightPos.x << std::endl << std::endl;
+	std::cout << "PosZ luz " << lightPos.z << std::endl << std::endl;
+	std::cout << "Int luz " << lightIntensity.x << std::endl << std::endl;
 
 	// Ángulo de desplazamiento de la camara
 	alphaX = glm::radians(aX);

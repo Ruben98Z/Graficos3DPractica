@@ -9,10 +9,11 @@ in vec2 texCoord;
 
 uniform sampler2D colorTex;
 uniform sampler2D emiTex;
+uniform sampler2D specTex;
+uniform sampler2D normalTex;
 
 uniform vec3 lightIntensity;
 uniform vec3 lightPos;
-
 
 uniform mat4 view;
 
@@ -30,6 +31,12 @@ vec3 Id = lightIntensity;
 vec3 Is = lightIntensity;
 vec3 lpos = (view * vec4(lightPos, 0)).xyz; 
 
+//Función Atenuación
+float C1 = 1.00;
+float C2 = 0.05;
+float C3 = 0.01;
+float at = 0;
+
 vec3 shade();
 
 void main()
@@ -37,7 +44,7 @@ void main()
 	Ka = texture(colorTex, texCoord).rgb;
 	Kd = texture(colorTex, texCoord).rgb;
 	Ke = texture(emiTex, texCoord).rgb;
-	Ks = vec3 (1.0);
+	Ks = texture(specTex,texCoord).rgb;
 
 	N = normalize (norm);
 	
