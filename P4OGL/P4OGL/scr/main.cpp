@@ -15,6 +15,7 @@
 
 #define RAND_SEED 31415926
 #define SCREEN_SIZE 500,500
+#define MASK_SIZE 25u
 
 //////////////////////////////////////////////////////////////
 // Datos que se almacenan en la memoria de la CPU
@@ -74,9 +75,35 @@ unsigned int postProccesFShader;
 unsigned int postProccesProgram;
 //Uniform
 unsigned int uColorTexPP;
+unsigned int uZTexPP;
 
 //Atributos
 int inPosPP;
+
+//Distancia focal
+int ufocdistance;
+float focalDistance = -25.0;
+int umaxdistance;
+float maxDistanceFactor = 1.0 / 5.0;
+
+//Plano near
+int uNear;
+float pnear = 1;
+
+//Plano far
+int uFar;
+float pfar = 50;
+
+
+int umaskfactor;
+int umask;
+float maskFactor = float(1.0 / 65.0);
+float* mask = new float[MASK_SIZE] {
+	1.0f * maskFactor, 2.0f * maskFactor, 3.0f * maskFactor, 2.0f * maskFactor, 1.0f * maskFactor,
+		2.0f * maskFactor, 3.0f * maskFactor, 4.0f * maskFactor, 3.0f * maskFactor, 2.0f * maskFactor,
+		3.0f * maskFactor, 4.0f * maskFactor, 5.0f * maskFactor, 4.0f * maskFactor, 3.0f * maskFactor,
+		2.0f * maskFactor, 3.0f * maskFactor, 4.0f * maskFactor, 3.0f * maskFactor, 2.0f * maskFactor,
+		1.0f * maskFactor, 2.0f * maskFactor, 3.0f * maskFactor, 2.0f * maskFactor, 1.0f * maskFactor };
 
 
 
@@ -132,8 +159,8 @@ int main(int argc, char** argv)
 
 	initContext(argc, argv);
 	initOGL();
-	initShaderFw("../shaders_P4/fwRendering.v2.vert", "../shaders_P4/fwRendering.v2.frag");
-	initShaderPP("../shaders_P4/postProcessing.v2.vert", "../shaders_P4/postProcessing.v2.frag");
+	initShaderFw("../shaders_P4/fwRendering.v3.vert", "../shaders_P4/fwRendering.v3.frag");
+	initShaderPP("../shaders_P4/postProcessing.v3.vert", "../shaders_P4/postProcessing.v3.frag");
 	initObj();
 	initPlane();
 
@@ -307,6 +334,15 @@ void initShaderPP(const char* vname, const char* fname)
 	}
 	uColorTexPP = glGetUniformLocation(postProccesProgram, "colorTex");
 	inPosPP = glGetAttribLocation(postProccesProgram, "inPos");
+
+	ufocdistance = glGetUniformLocation(postProccesProgram, "focalDistance");
+	umaxdistance = glGetUniformLocation(postProccesProgram, "maxDistanceFactor");
+
+	uNear = glGetUniformLocation(postProccesProgram, "near");
+	uFar = glGetUniformLocation(postProccesProgram, "far");
+
+	umaskfactor = glGetUniformLocation(postProccesProgram, "maskFactor");
+	umask = glGetUniformLocation(postProccesProgram, "mask");
 
 }
 
@@ -558,6 +594,25 @@ void renderFunc()
 
 	glUseProgram(postProccesProgram);
 
+
+	if (umaxdistance != -1) 
+		glUniform1fv(umaxdistance, 1, &maxDistanceFactor);
+
+	if (ufocdistance != -1) 
+		glUniform1fv(ufocdistance, 1, &focalDistance);
+
+	if (uNear != -1) 
+		glUniform1fv(uNear, 1, &pnear);
+
+	if (uFar != -1) 
+		glUniform1fv(uFar, 1, &pfar);
+
+	if (umaskfactor != -1) 
+		glUniform1fv(umaskfactor, 1, &maskFactor);
+
+	if (umask != -1) 
+		glUniform1fv(umask, 25, mask);
+
 	//Activar texturas
 
 	glDisable(GL_CULL_FACE);
@@ -618,6 +673,45 @@ void idleFunc()
 	glutPostRedisplay();
 }
 
-void keyboardFunc(unsigned char key, int x, int y){}
+void keyboardFunc(unsigned char key, int x, int y) {
+	std::cout << "Se ha pulsado la tecla " << key << std::endl << std::endl;
+	switch (key) {
+	case 'd':
+		maxDistanceFactor = maxDistanceFactor * 0.5;
+		std::cout << "Distancia máxima: " << maxDistanceFactor << std::endl;
+		break;
+	case 'D':
+		maxDistanceFactor = maxDistanceFactor * 2;
+		std::cout << "Distancia máxima: " << maxDistanceFactor << std::endl;
+		break;
+	case 'F':
+		focalDistance = focalDistance + 1;
+		std::cout << "Distancia focal: " << focalDistance << std::endl;
+		break;
+	case 'f':
+		focalDistance = focalDistance - 1;
+		std::cout << "Distancia focal: " << focalDistance << std::endl;
+		break;
+	case 'M':
+		maskFactor = float(1.0 / 65.0);
+		mask = new float[25]{
+			1.0f * maskFactor, 2.0f * maskFactor, 3.0f * maskFactor, 2.0f * maskFactor, 1.0f * maskFactor,
+			2.0f * maskFactor, 3.0f * maskFactor, 4.0f * maskFactor, 3.0f * maskFactor, 2.0f * maskFactor,
+			3.0f * maskFactor, 4.0f * maskFactor, 5.0f * maskFactor, 4.0f * maskFactor, 3.0f * maskFactor,
+			2.0f * maskFactor, 3.0f * maskFactor, 4.0f * maskFactor, 3.0f * maskFactor, 2.0f * maskFactor,
+			1.0f * maskFactor, 2.0f * maskFactor, 3.0f * maskFactor, 2.0f * maskFactor, 1.0f * maskFactor
+	};
+		break;
+	case 'm':
+		maskFactor = 0.5f;
+		mask = new float[25] {
+			0.0f * maskFactor, 0.0f * maskFactor, 0.0f * maskFactor, 0.0f * maskFactor, 0.0f * maskFactor,
+				0.0f * maskFactor, -2.0f * maskFactor, -1.0f * maskFactor, 0.0f * maskFactor, 0.0f * maskFactor,
+				0.0f * maskFactor, -1.0f * maskFactor, 1.0f * maskFactor, +1.0f * maskFactor, 0.0f * maskFactor,
+				0.0f * maskFactor, 0.0f * maskFactor, +1.0f * maskFactor, 2.0f * maskFactor, 0.0f * maskFactor,
+				0.0f * maskFactor, 0.0f * maskFactor, 0.0f * maskFactor, 0.0f * maskFactor, 0.0f * maskFactor };
+		break;
+	}
+}
 void mouseFunc(int button, int state, int x, int y){}
 
