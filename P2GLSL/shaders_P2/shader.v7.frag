@@ -14,9 +14,8 @@ uniform sampler2D emiTex;
 vec3 Ia = vec3(0.1);
 vec3 Il = vec3(1);
 vec3 pl = vec3(0); //Sistema de la camara
-float aper = cos(radians(5.));	//Apertura del foco 
+float aper = cos(radians(15.));	//Apertura del foco 
 float Expfoc = 2;
-vec3 L;
 
 //Direccion de la luz
 vec3 dir = vec3(0,0,1);
@@ -32,31 +31,43 @@ float n = 100.0;
 vec3 N;
 vec3 p;
 
+//Variables calculo luz
+float Id0 = 30;
+float d0 = 1.0;
+float epsilon = 1.0;
+
+//Direccion del foco
+vec3 D = vec3(0,0,-1);
+
+float fdir;       //Factor atenuacion
+float fdist;	 //Factor de distancia. 
+
+
 vec3 shade()
 {
-	vec3 c = vec3(0);
+	vec3 c = vec3(0);	
+	vec3 L =  normalize(pl-p);
+	//Calculo de Fdist. 
+    float distance = length(pl-p);
+	float fdist =  Id0 * pow((d0/ max(distance,1)), 2.0); 
+
+	//Calculo Fdir.
+	float shadow = -dot(L,D);
+	fdir = aper < shadow ? pow((shadow - aper) / (1-aper),Expfoc) : 0;
+
 
 	//Amb
 	c+= Ia*Ka;
 
-	//Diff
-	L= normalize(pl-p);
-	vec3 Id = Il*Kd* max(dot(N,L),0);
-	c += Id;
+	//Diff;
+	c+= (fdist*fdir*Il)*Kd* max(dot(N,L),0);
 
 	//Spc
 	vec3 R = reflect(-L, N);
 	vec3 V = normalize(-p);
-	vec3 Is = Il*Ks* max(dot (R,V), 0);
+	c+= (fdist*fdir*Il)* Ks* pow(max(dot(R,V),0),n);
 
-	float dotfocal  = dot(L,normalize(dir));
-
-
-	if (dotfocal > aper)
-		c+= Id + Is * pow((dotfocal-aper)/(1-aper),Expfoc);
-
-	//Emi
-	c += Ke;
+	c+=Ke;
 
 	return c;
 }
