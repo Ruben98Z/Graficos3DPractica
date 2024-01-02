@@ -267,6 +267,14 @@ void initShader(const char *vname, const char *fname)
 	program = glCreateProgram();
 	glAttachShader(program, vshader);
 	glAttachShader(program, fshader);
+
+	/*
+	glBindAttribLocation(program, 0, "inPos");
+	glBindAttribLocation(program, 1, "inColor");
+	glBindAttribLocation(program, 2, "inNormal");
+	glBindAttribLocation(program, 3, "inTexCoord");
+	*/
+
 	glLinkProgram(program);
 
 	int linked;
@@ -311,10 +319,12 @@ void initShader2(const char* vname, const char* fname) {
 	glAttachShader(program2, vshader2);
 	glAttachShader(program2, fshader2);
 
+	/*
 	glBindAttribLocation(program2, 0, "inPos");
 	glBindAttribLocation(program2, 1, "inColor");
 	glBindAttribLocation(program2, 2, "inNormal");
 	glBindAttribLocation(program2, 3, "inTexCoord");
+	*/
 
 	glLinkProgram(program2);
 
@@ -600,13 +610,28 @@ void renderFunc(){
 		glUniform3fv(uLightPos, 1, &(lightPos.x));
 
 
+	//Texturas primer cubo
+	if (uColorTex != -1)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, colorTexId);
+		glUniform1i(uColorTex, 0);
+	}
+	if (uEmiTex != -1)
+	{
+		glActiveTexture(GL_TEXTURE0 + 1);
+		glBindTexture(GL_TEXTURE_2D, emiTexId);
+		glUniform1i(uEmiTex, 1);
+	}
+
+
 	//Activo la geometria que voy a pintar
 	glBindVertexArray(vao);
 
 	glDrawElements(GL_TRIANGLES, cubeNTriangleIndex * 3,
 		GL_UNSIGNED_INT, (void*)0);
 
-
+	glUseProgram(program2);
 
 	// Segundo cubo
 	modelView = view * model2;
@@ -630,25 +655,9 @@ void renderFunc(){
 	if (uLightPos2 != -1)
 		glUniform3fv(uLightPos2, 1, &(lightPos.x));
 
-	glDrawElements(GL_TRIANGLES, cubeNTriangleIndex * 3,
-		GL_UNSIGNED_INT, (void*)0);
 
-	
-	//Texturas
-	if (uColorTex != -1)
-	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, colorTexId);
-		glUniform1i(uColorTex, 0);
-	}
-	if (uEmiTex != -1)
-	{
-		glActiveTexture(GL_TEXTURE0 + 1);
-		glBindTexture(GL_TEXTURE_2D, emiTexId);
-		glUniform1i(uEmiTex, 1);
-	}
 
-	//Texturas
+	//Texturas segundo cubo
 
 	if (uColorTex2 != -1)
 	{
@@ -675,6 +684,9 @@ void renderFunc(){
 		glBindTexture(GL_TEXTURE_2D, normalTexId);
 		glUniform1i(uNormalTex, 5);
 	}
+
+	glDrawElements(GL_TRIANGLES, cubeNTriangleIndex * 3,
+		GL_UNSIGNED_INT, (void*)0);
 
 	
 

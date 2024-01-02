@@ -29,7 +29,7 @@ vec3 Ke;
 vec3 Ia = vec3 (0.3);
 vec3 Id = lightIntensity;
 vec3 Is = lightIntensity;
-vec3 lpos = (view * vec4(lightPos, 0)).xyz; 
+vec3 lpos = (view * vec4(lightPos, 1)).xyz; 
 
 //Función Atenuación
 float C1 = 1.00;
