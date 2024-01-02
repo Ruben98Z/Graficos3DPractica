@@ -136,9 +136,9 @@ void idleFunc()
 	IGlib::setModelMat(objId, model);
 
 	// Segundo cubo 
-	glm::mat4 rotate90y = glm::rotate(I, angle, glm::vec3(0.f, 1.f, 0.f));
+	glm::mat4 rotateY = glm::rotate(I, angle, glm::vec3(0.f, 1.f, 0.f));
 	glm::mat4 translate = glm::translate(I, glm::vec3(-3.0, 0.0, 0.0));
-	glm::mat4 model2 = rotate90y * translate * rotate90y;
+	glm::mat4 model2 = rotateY * translate * rotateY;
 	IGlib::setModelMat(objId2, model2);
 }
 
