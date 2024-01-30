@@ -84,6 +84,10 @@ unsigned int specTexId;
 unsigned int normalTexId;
 
 
+//Filtro anisotropico.
+GLfloat fLargest; 
+
+
 
 //Texturas Uniform
 int uColorTex;
@@ -198,6 +202,12 @@ void initContext(int argc, char** argv){
 	}
 	const GLubyte* oglVersion = glGetString(GL_VERSION);
 	std::cout << "This system supports OpenGL Version: " << oglVersion << std::endl;
+
+	//Filtro anisotropico. 
+	if (glewIsSupported("GL_EXT_texture_filter_anisotropic"))
+	{
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &fLargest);
+	}
 
 
 	glutReshapeFunc(resizeFunc);
@@ -575,6 +585,10 @@ unsigned int loadTex(const char *fileName){
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, fLargest);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 
 	return texId;
