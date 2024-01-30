@@ -86,6 +86,10 @@ float focalDistance = -25.0;
 int umaxdistance;
 float maxDistanceFactor = 1.0 / 5.0;
 
+//Motion blur
+float alpha = 0.6;
+float color = 0.5f;
+
 //Plano near
 int uNear;
 float pnear = 1;
@@ -93,6 +97,24 @@ float pnear = 1;
 //Plano far
 int uFar;
 float pfar = 50;
+
+// Viewport
+int w = 500;
+int h = 500;
+
+// Angulo de desplazamiento camara
+float alphaX = 0;
+float alphaY = 0;
+
+float aX = 0.0;
+float aY = 0.0;
+
+// Posicion de la camara
+float posX = 1;
+float posZ = -6;
+
+// Vector look at de la camara
+glm::vec3 lookat(0, 0, -1);
 
 
 int umaskfactor;
@@ -451,7 +473,7 @@ void resizeFBO(unsigned int w, unsigned int h)
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
 		depthBuffTexId, 0);
 
-	const GLenum buffs[2] = { GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT4 }; //Array de posiciones, El attachment4 va al render traget 1, En el render target 0 no va ningun attachment 
+	const GLenum buffs[2] = { GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT4 }; //Array de posiciones, El attachment4 va al render target 1, En el render target 0 no va ningun attachment 
 	glDrawBuffers(2, buffs);
 
 	if (GL_FRAMEBUFFER_COMPLETE != glCheckFramebufferStatus(GL_FRAMEBUFFER))
@@ -594,6 +616,13 @@ void renderFunc()
 
 	glUseProgram(postProccesProgram);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_CONSTANT_COLOR, GL_CONSTANT_ALPHA);
+	glBlendColor(color, color, color, alpha);
+
+
+	glBlendEquation(GL_FUNC_ADD);
+
 
 	if (umaxdistance != -1) 
 		glUniform1fv(umaxdistance, 1, &maxDistanceFactor);
@@ -625,6 +654,7 @@ void renderFunc()
 
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 
 
 	//Activar FBO
@@ -676,13 +706,47 @@ void idleFunc()
 void keyboardFunc(unsigned char key, int x, int y) {
 	std::cout << "Se ha pulsado la tecla " << key << std::endl << std::endl;
 	switch (key) {
-	case 'd':
-		maxDistanceFactor = maxDistanceFactor * 0.5;
-		std::cout << "Distancia máxima: " << maxDistanceFactor << std::endl;
+	case 'a':
+		posX = posX + 0.2;
 		break;
-	case 'D':
-		maxDistanceFactor = maxDistanceFactor * 2;
-		std::cout << "Distancia máxima: " << maxDistanceFactor << std::endl;
+	case 'w':
+		posZ = posZ + 0.2;
+		break;
+	case 's':
+		posZ = posZ - 0.2;
+		break;
+	case 'd':
+		posX = posX - 0.2;
+		break;
+	case 'y':
+		aX = aX + 10;
+		break;
+	case 'Y':
+		aX = aX - 10;
+		break;
+	case 'c':
+		alpha -= 0.1;
+		color += 0.1;
+		std::cout << "Alpha: " << alpha << std::endl;
+		std::cout << "Color: " << color << std::endl;
+		break;
+	case 'C':
+		alpha += 0.1;
+		color -= 0.1;
+		std::cout << "Alpha: " << alpha << std::endl;
+		std::cout << "Color: " << color << std::endl;
+		break;
+	case 'v':
+		if (maxDistanceFactor > 0.0f) {
+			maxDistanceFactor = maxDistanceFactor - 0.1;
+		}
+		std::cout << "Desenfoque máximo: " << maxDistanceFactor << std::endl;
+		break;
+	case 'V':
+		if (maxDistanceFactor < 1.0f) {
+			maxDistanceFactor = maxDistanceFactor + 0.1;
+		}
+		std::cout << "Desenfoque máximo: " << maxDistanceFactor << std::endl;
 		break;
 	case 'F':
 		focalDistance = focalDistance + 1;
@@ -712,6 +776,59 @@ void keyboardFunc(unsigned char key, int x, int y) {
 				0.0f * maskFactor, 0.0f * maskFactor, 0.0f * maskFactor, 0.0f * maskFactor, 0.0f * maskFactor };
 		break;
 	}
+
+
+	std::cout << "PosX " << posX << std::endl << std::endl;
+	std::cout << "PosZ " << posZ << std::endl << std::endl;
+	std::cout << "aX " << aX << std::endl << std::endl;
+	std::cout << "aY " << aY << std::endl << std::endl;
+
+
+	// Ángulo de desplazamiento de la camara
+	alphaX = glm::radians(aX);
+
+	float x_lookAt = glm::cos(alphaY) * glm::sin(alphaX);
+	float y_lookAt = glm::sin(alphaY);
+	float z_lookAt = glm::cos(alphaY) * glm::cos(alphaX);
+
+	// Matriz view
+	glm::vec3 pos(posX, 0, posZ);
+	lookat = glm::vec3(x_lookAt, y_lookAt, z_lookAt);
+	glm::vec3 up(0.0, 1.0, 0.0);
+	view = glm::lookAt(pos, pos + lookat, up);
+
+	glutPostRedisplay();
 }
-void mouseFunc(int button, int state, int x, int y){}
+
+void mouseFunc(int button, int state, int x, int y)
+{
+	// Posición del raton con respecto el viewport
+	int posYMouse = (h / 2) - y;
+	int posXMouse = (w / 2) - x;
+
+	// Ángulo de desplazamiento de la camara aplicando una sensibilidad
+	aY = posYMouse * 0.3;
+	aX = posXMouse * 0.3;
+
+
+	// Limitar los ángulos para evitar giros bruscos
+	alphaY = glm::radians(aY);
+	alphaX = glm::radians(aX);
+
+	// Calcular la dirección de la mirada (lookAt)
+	float x_lookAt = glm::cos(alphaY) * glm::sin(alphaX);
+	float y_lookAt = glm::sin(alphaY);
+	float z_lookAt = glm::cos(alphaY) * glm::cos(alphaX);
+
+	// Actualiza la posición y la orientación de la cámara
+	glm::vec3 pos = glm::vec3(posX, 0, posZ);
+	lookat = glm::vec3(x_lookAt, y_lookAt, z_lookAt);
+	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	// Actualiza la matriz de vista (view)
+	view = glm::lookAt(pos, pos + lookat, up);
+
+	// Actualiza la matriz de vista en IGlib (o donde sea necesario)
+	glutPostRedisplay();
+}
 

@@ -542,7 +542,7 @@ void renderFunc()
 	glDisable(GL_DEPTH_TEST);
 
 	//Desenfoque
-	//Activo el blend y luego lo desactivo apra que no se fusionen los cubos de detras con los de delante
+	//Activo el blend y luego lo desactivo para que no se fusionen los cubos de detras con los de delante
 	glEnable(GL_BLEND);
 
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Configura los pesos de la fuente y el destino
